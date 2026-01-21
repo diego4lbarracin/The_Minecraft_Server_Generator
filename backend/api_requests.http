@@ -1,0 +1,62 @@
+# Sample API Requests for Testing
+
+## Health Check
+GET http://localhost:8080/ec2/health
+
+###
+
+## Create EC2 Instance - Minimal (uses t3.small by default)
+POST http://localhost:8080/ec2/create
+Content-Type: application/json
+
+{}
+
+###
+
+## Create EC2 Instance - Basic
+POST http://localhost:8080/ec2/create
+Content-Type: application/json
+
+{
+  "instance_type": "t3.small",
+  "tag_name": "my-minecraft-server"
+}
+
+###
+
+## Create EC2 Instance - With Custom AMI
+POST http://localhost:8080/ec2/create
+Content-Type: application/json
+
+{
+  "instance_type": "t3.small",
+  "image_id": "ami-0c55b159cbfafe1f0",
+  "tag_name": "minecraft-server-1"
+}
+
+###
+
+## Create EC2 Instance - With SSH Key
+POST http://localhost:8080/ec2/create
+Content-Type: application/json
+
+{
+  "instance_type": "t3.small",
+  "key_name": "your-key-pair-name",
+  "tag_name": "minecraft-server-2"
+}
+
+###
+
+## Create EC2 Instance - Full Configuration
+POST http://localhost:8080/ec2/create
+Content-Type: application/json
+
+{
+  "instance_type": "t3.small",
+  "image_id": "ami-0c55b159cbfafe1f0",
+  "key_name": "your-key-pair-name",
+  "tag_name": "production-minecraft-server"
+}
+
+###

@@ -24,9 +24,41 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
+# Environment files - NEVER commit .env, but DO commit .env.example
 .env
+.env.local
+.env.*.local
+backend/.env
+*/.env
+
+# AWS credentials and keys
+*.pem
+*.key
+.aws/
+credentials
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+*.exe
+backend/server.exe
+backend/server
+
+# Documentation drafts (optional - remove if you want to track these)
+*.md.draft
+
+#Important Folder
+docker-minecraft-server/
