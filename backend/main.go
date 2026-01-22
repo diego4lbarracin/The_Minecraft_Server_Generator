@@ -54,6 +54,7 @@ func main() {
 		minecraftRoutes.GET("/health", minecraftHandler.HealthCheck)
 		minecraftRoutes.POST("/create", minecraftHandler.CreateMinecraftServer)
 		minecraftRoutes.GET("/info/:instance_id", minecraftHandler.GetServerInfo)
+		minecraftRoutes.POST("/test", minecraftHandler.TestServerCreation)
 	}
 
 	// Start server

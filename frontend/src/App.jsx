@@ -8,6 +8,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
+import ServerStatusPage from "./pages/ServerStatusPage";
 
 function App() {
   return (
@@ -55,7 +56,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          {/* Server Status Page - Public (opened in new tab) */}
+          <Route path="/server-status" element={<ServerStatusPage />} />
           {/* Pending Approval Route */}
           <Route path="/pending-approval" element={<PendingApprovalPage />} />
         </Routes>
