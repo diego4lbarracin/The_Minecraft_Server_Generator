@@ -1,6 +1,6 @@
 module github.com/diego4lbarracin/The_Minecraft_Server_Generator
 
-go 1.25.3
+go 1.25.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.1
