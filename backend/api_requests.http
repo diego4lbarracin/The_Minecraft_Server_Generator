@@ -60,3 +60,10 @@ Content-Type: application/json
 }
 
 ###
+
+## Test Minecraft Server Creation Script
+## This endpoint executes the test_minecraft_api.ps1 script
+## and returns the server IP if successful
+POST http://localhost:8080/minecraft/test
+
+###

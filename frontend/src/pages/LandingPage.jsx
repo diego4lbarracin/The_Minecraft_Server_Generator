@@ -101,11 +101,9 @@ const LandingPage = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Lightning Fast
-            </h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-3">Very Fast</h3>
             <p className="text-gray-600">
-              Deploy your server in seconds with our optimized infrastructure.
+              Deploy your own dedicated Minecraft server in just 2 minutes!
             </p>
           </div>
 
@@ -129,7 +127,8 @@ const LandingPage = () => {
               Secure & Reliable
             </h3>
             <p className="text-gray-600">
-              Your server is protected with enterprise-grade security.
+              Your servers run on protected infrastructure and are ready to be
+              used 24/7!
             </p>
           </div>
 
@@ -159,7 +158,8 @@ const LandingPage = () => {
               Fully Customizable
             </h3>
             <p className="text-gray-600">
-              Customize every aspect of your server to match your vision.
+              Customize every aspect of your server, select the seed, game mode,
+              Minecraft version and many more options!
             </p>
           </div>
         </div>

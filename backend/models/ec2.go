@@ -23,4 +23,5 @@ type EC2InstanceResponse struct {
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Message string `json:"message"`
+	Details string `json:"details,omitempty"` // Optional additional details
 }

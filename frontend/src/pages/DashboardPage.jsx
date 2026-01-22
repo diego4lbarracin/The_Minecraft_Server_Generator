@@ -5,8 +5,9 @@ import Footer from "../components/Footer";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, getAuthToken } = useAuth();
   const [isRunning, setIsRunning] = useState(false);
+  const [error, setError] = useState("");
 
   const handleLogout = async () => {
     navigate("/");
@@ -15,14 +16,63 @@ const DashboardPage = () => {
 
   const handleRunScript = async () => {
     setIsRunning(true);
-    // Simulate script execution
-    console.log("Running script...");
+    setError("");
 
-    // Add your actual script execution logic here
-    setTimeout(() => {
+    try {
+      // Get authentication token
+      const token = await getAuthToken();
+
+      if (!token) {
+        throw new Error("Not authenticated. Please log in again.");
+      }
+
+      // Call the backend API with authentication
+      const response = await fetch("http://localhost:8080/minecraft/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          eula: true,
+          server_name: `minecraft-${Date.now()}`,
+          minecraft_type: "VANILLA",
+          version: "LATEST",
+          max_players: 20,
+          gamemode: "survival",
+          difficulty: "normal",
+          motd: "Server created from dashboard!",
+          memory: "3G",
+          online_mode: false,
+          instance_type: "t3.medium",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create server");
+      }
+
+      const data = await response.json();
+      console.log("Server created:", data);
+
+      // Open new tab with server status page
+      const params = new URLSearchParams({
+        instanceId: data.instance_id,
+        publicIp: data.public_ip,
+        serverAddress: data.server_address,
+        serverName: data.server_name,
+        minecraftVersion: data.minecraft_version,
+        serverType: data.server_type,
+      });
+
+      window.open(`/server-status?${params.toString()}`, "_blank");
+    } catch (err) {
+      console.error("Error creating server:", err);
+      setError(err.message || "Failed to create server. Please try again.");
+    } finally {
       setIsRunning(false);
-      alert("Script executed successfully!");
-    }, 2000);
+    }
   };
 
   return (
@@ -137,10 +187,10 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">
-                    Execute Server Script
+                    Test Our Service
                   </h4>
                   <p className="text-sm text-gray-600">
-                    Run your custom Minecraft server script
+                    Run a default Minecraft Server to test our service.
                   </p>
                 </div>
                 <button
@@ -192,7 +242,7 @@ const DashboardPage = () => {
                           d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      <span>Run Script</span>
+                      <span>Run Server</span>
                     </>
                   )}
                 </button>

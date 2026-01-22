@@ -47,7 +47,7 @@ const SignUpPage = () => {
           setError(error.message);
         } else {
           setAlertMessage(
-            "Your account has been created! Please wait for admin approval before you can access the dashboard. You will receive an email notification once approved.",
+            "Account created successfully! Your account is pending approval. You will receive an email notification once approved.",
           );
           setShowAlert(true);
 
@@ -56,10 +56,6 @@ const SignUpPage = () => {
             password: "",
             confirmPassword: "",
           });
-
-          setTimeout(() => {
-            navigate("/login");
-          }, 3000);
         }
       } catch (err) {
         setError("An unexpected error occurred. Please try again.");
@@ -190,7 +186,10 @@ const SignUpPage = () => {
       {showAlert && (
         <CustomAlert
           message={alertMessage}
-          onClose={() => setShowAlert(false)}
+          onClose={() => {
+            setShowAlert(false);
+            navigate("/login");
+          }}
         />
       )}
     </div>
