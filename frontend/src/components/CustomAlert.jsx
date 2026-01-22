@@ -1,14 +1,6 @@
 import { useState, useEffect } from "react";
 
 const CustomAlert = ({ message, onClose }) => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 5000); // Auto-close after 5 seconds
-
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 animate-bounce-in">

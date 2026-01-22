@@ -56,10 +56,6 @@ const SignUpPage = () => {
             password: "",
             confirmPassword: "",
           });
-
-          setTimeout(() => {
-            navigate("/login");
-          }, 3000);
         }
       } catch (err) {
         setError("An unexpected error occurred. Please try again.");
@@ -190,7 +186,10 @@ const SignUpPage = () => {
       {showAlert && (
         <CustomAlert
           message={alertMessage}
-          onClose={() => setShowAlert(false)}
+          onClose={() => {
+            setShowAlert(false);
+            navigate("/login");
+          }}
         />
       )}
     </div>
