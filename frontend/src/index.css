@@ -1,0 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-minecraft-headerBrown: #25190c;
+  --color-minecraft-brown: #53402e;
+  --color-minecraft-darkBrown: #3d2f22;
+  --color-minecraft-green: #2b3a26;
+  --color-minecraft-darkGreen: #1f2b1c;
+  --color-minecraft-grass: #7cbd6b;
+  --color-minecraft-dirt: #8b6f47;
+  --color-minecraft-stone: #7f7f7f;
+
+  --font-family-minecraft: "Press Start 2P", cursive;
+  --font-family-sans: "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: #012500;
+    @apply text-gray-100 m-0 min-h-screen;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-2.5 bg-minecraft-green hover:bg-minecraft-darkGreen text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 bg-minecraft-brown hover:bg-minecraft-darkBrown text-white font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-minecraft-green focus:border-transparent outline-none transition-all duration-200 text-gray-900;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-lg p-8;
+  }
+}
