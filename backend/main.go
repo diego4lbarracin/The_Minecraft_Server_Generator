@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/diego4lbarracin/The_Minecraft_Server_Generator/handlers"
 	"github.com/diego4lbarracin/The_Minecraft_Server_Generator/middleware"
@@ -62,9 +63,12 @@ func main() {
 	}
 
 	// Start server
-	port := ":8080"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	log.Printf("Server starting on port %s", port)
-	if err := router.Run(port); err != nil {
+	if err := router.Run(":" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
