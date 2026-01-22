@@ -93,6 +93,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Get authentication token for API calls
+  const getAuthToken = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    return session?.access_token || null;
+  };
+
   const value = {
     user,
     profile,
@@ -101,6 +109,7 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signOut,
     refreshProfile,
+    getAuthToken,
   };
 
   return (

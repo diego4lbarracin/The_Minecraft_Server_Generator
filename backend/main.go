@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/diego4lbarracin/The_Minecraft_Server_Generator/handlers"
+	"github.com/diego4lbarracin/The_Minecraft_Server_Generator/middleware"
 	"github.com/diego4lbarracin/The_Minecraft_Server_Generator/services"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -43,18 +44,21 @@ func main() {
 
 	// Register EC2 routes
 	ec2Routes := router.Group("/ec2")
+	ec2Routes.Use(middleware.AuthMiddleware()) // Protected routes
 	{
-		ec2Routes.GET("/health", ec2Handler.HealthCheck)
 		ec2Routes.POST("/create", ec2Handler.CreateInstance)
 	}
 
 	// Register Minecraft routes
 	minecraftRoutes := router.Group("/minecraft")
 	{
+		// Public routes (no auth required)
 		minecraftRoutes.GET("/health", minecraftHandler.HealthCheck)
-		minecraftRoutes.POST("/create", minecraftHandler.CreateMinecraftServer)
-		minecraftRoutes.GET("/info/:instance_id", minecraftHandler.GetServerInfo)
-		minecraftRoutes.POST("/test", minecraftHandler.TestServerCreation)
+		
+		// Protected routes (auth required)
+		minecraftRoutes.POST("/create", middleware.AuthMiddleware(), minecraftHandler.CreateMinecraftServer)
+		minecraftRoutes.GET("/info/:instance_id", middleware.AuthMiddleware(), minecraftHandler.GetServerInfo)
+		minecraftRoutes.POST("/test", middleware.AuthMiddleware(), minecraftHandler.TestServerCreation)
 	}
 
 	// Start server

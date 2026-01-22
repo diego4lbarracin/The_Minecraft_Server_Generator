@@ -38,7 +38,9 @@ $requestBody = @{
     gamemode = "survival"
     difficulty = "normal"
     motd = "Test Minecraft Server - Created via API"
-    memory = "1G"
+    memory = "3G"
+    online_mode = $false
+    instance_type = "t3.medium"
 } | ConvertTo-Json
 
 Write-Host "Request:" -ForegroundColor Cyan

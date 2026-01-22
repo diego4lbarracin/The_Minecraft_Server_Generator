@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 
 const ServerStatusPage = () => {
   const [searchParams] = useSearchParams();
-  const [timeRemaining, setTimeRemaining] = useState(180); // 3 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes in seconds
   const [showIP, setShowIP] = useState(false);
   const [serverData, setServerData] = useState(null);
   const [isActive, setIsActive] = useState(false);

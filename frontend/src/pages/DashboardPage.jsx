@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, getAuthToken } = useAuth();
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState("");
 
@@ -19,11 +19,19 @@ const DashboardPage = () => {
     setError("");
 
     try {
-      // Call the backend API
+      // Get authentication token
+      const token = await getAuthToken();
+
+      if (!token) {
+        throw new Error("Not authenticated. Please log in again.");
+      }
+
+      // Call the backend API with authentication
       const response = await fetch("http://localhost:8080/minecraft/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           eula: true,
@@ -34,7 +42,9 @@ const DashboardPage = () => {
           gamemode: "survival",
           difficulty: "normal",
           motd: "Server created from dashboard!",
-          memory: "1G",
+          memory: "3G",
+          online_mode: false,
+          instance_type: "t3.medium",
         }),
       });
 
@@ -177,10 +187,10 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">
-                    Execute Server Script
+                    Test Our Service
                   </h4>
                   <p className="text-sm text-gray-600">
-                    Run your custom Minecraft server script
+                    Run a default Minecraft Server to test our service.
                   </p>
                 </div>
                 <button
@@ -232,7 +242,7 @@ const DashboardPage = () => {
                           d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                       </svg>
-                      <span>Run Script</span>
+                      <span>Run Server</span>
                     </>
                   )}
                 </button>
