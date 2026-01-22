@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSigningUp, setIsSigningUp] = useState(false); // Flag to prevent auto-login during signup
 
   // Fetch user profile from profiles table
   const fetchProfile = async (userId) => {
@@ -47,6 +48,11 @@ export const AuthProvider = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Ignore auth state changes during signup to prevent auto-login
+      if (isSigningUp) {
+        return;
+      }
+
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
@@ -57,17 +63,28 @@ export const AuthProvider = ({ children }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isSigningUp]);
 
-  // Sign up function
+  // Sign up function - creates account without keeping user logged in
   const signUp = async (email, password) => {
+    // Set flag to prevent auth listener from catching the session
+    setIsSigningUp(true);
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
     });
+
+    // Immediately discard the session
+    if (!error && data.session) {
+      await supabase.auth.signOut();
+    }
+
+    // Reset flag after a brief delay to ensure signOut completes
+    setTimeout(() => {
+      setIsSigningUp(false);
+    }, 100);
+
     return { data, error };
   };
 
