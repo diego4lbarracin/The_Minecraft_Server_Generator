@@ -135,12 +135,6 @@ The landing page uses a default Steve skin from `https://mc-heads.net/avatar/ste
 
 Edit `src/components/Footer.jsx` to update social media URLs:
 
-```jsx
-<a href="https://github.com/YOUR_USERNAME" ...>
-<a href="https://twitter.com/YOUR_USERNAME" ...>
-<a href="https://linkedin.com/in/YOUR_USERNAME" ...>
-```
-
 ## 🛠️ Build for Production
 
 ```bash

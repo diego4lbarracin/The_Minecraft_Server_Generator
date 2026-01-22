@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import Footer from "../components/Footer";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [isRunning, setIsRunning] = useState(false);
 
-  const handleLogout = () => {
-    // Handle logout logic here
+  const handleLogout = async () => {
     navigate("/");
+    await signOut();
   };
 
   const handleRunScript = async () => {
@@ -44,7 +47,8 @@ const DashboardPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  Welcome to Your Dashboard! 🎮
+                  Welcome back to your dashboard{" "}
+                  <span style={{ color: "#22c55e" }}>{user?.email}</span>!
                 </h2>
                 <p className="text-gray-600">
                   Manage your Minecraft servers from here
@@ -229,37 +233,9 @@ const DashboardPage = () => {
               </div>
             </div>
           </div>
-
-          {/* Info Banner */}
-          <div className="mt-8 bg-minecraft-green/10 border border-minecraft-green/20 rounded-lg p-6">
-            <div className="flex items-start space-x-3">
-              <svg
-                className="w-6 h-6 text-minecraft-green flex-shrink-0 mt-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-1">
-                  Getting Started
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Welcome to your server dashboard! More features are coming
-                  soon. For now, you can run scripts to manage your Minecraft
-                  servers.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
