@@ -8,4 +8,5 @@ export default defineConfig({
     process.env.GITHUB_PAGES === "true"
       ? "/The_Minecraft_Server_Generator/"
       : "/",
+  publicDir: "public",
 });
