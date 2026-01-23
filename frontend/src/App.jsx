@@ -11,8 +11,13 @@ import PendingApprovalPage from "./pages/PendingApprovalPage";
 import ServerStatusPage from "./pages/ServerStatusPage";
 
 function App() {
+  const basename =
+    import.meta.env.VITE_GITHUB_PAGES === "true"
+      ? "/The_Minecraft_Server_Generator"
+      : "";
+
   return (
-    <Router>
+    <Router basename={basename}>
       <div className="flex flex-col min-h-screen">
         <Routes>
           {/* Public Routes with Header and Footer */}

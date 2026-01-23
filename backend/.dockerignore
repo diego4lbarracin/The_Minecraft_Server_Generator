@@ -1,0 +1,38 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.docker
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+server
+main
+
+# Test files
+*_test.go
+*.test
+
+# Documentation
+*.md
+!README.md
+
+# Scripts
+*.ps1
+*.sh
+*.http
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore

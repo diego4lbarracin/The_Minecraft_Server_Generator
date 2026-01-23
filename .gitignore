@@ -28,7 +28,9 @@ go.work.sum
 .env
 .env.local
 .env.*.local
+.env.docker
 backend/.env
+backend/.env.docker
 */.env
 
 # AWS credentials and keys

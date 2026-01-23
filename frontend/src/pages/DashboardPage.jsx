@@ -27,7 +27,8 @@ const DashboardPage = () => {
       }
 
       // Call the backend API with authentication
-      const response = await fetch("http://localhost:8080/minecraft/create", {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      const response = await fetch(`${apiUrl}/minecraft/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
