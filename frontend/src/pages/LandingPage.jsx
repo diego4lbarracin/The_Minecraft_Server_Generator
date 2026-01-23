@@ -1,3 +1,5 @@
+import minecraftSkin from "/image_skin.png";
+
 const LandingPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -9,7 +11,7 @@ const LandingPage = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-minecraft-green opacity-20 blur-3xl rounded-full"></div>
               <img
-                src="/image_skin.png"
+                src={minecraftSkin}
                 alt="Minecraft Character"
                 className="relative w-64 h-64 md:w-96 md:h-96 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300"
               />
