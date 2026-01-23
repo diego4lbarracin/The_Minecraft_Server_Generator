@@ -67,7 +67,11 @@ const DashboardPage = () => {
         serverType: data.server_type,
       });
 
-      window.open(`/server-status?${params.toString()}`, "_blank");
+      const basePath =
+        import.meta.env.VITE_GITHUB_PAGES === "true"
+          ? "/The_Minecraft_Server_Generator"
+          : "";
+      window.open(`${basePath}/server-status?${params.toString()}`, "_blank");
     } catch (err) {
       console.error("Error creating server:", err);
       setError(err.message || "Failed to create server. Please try again.");
