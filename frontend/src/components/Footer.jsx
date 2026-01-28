@@ -49,6 +49,18 @@ const Footer = () => {
               diegoalbarracin0405@gmail.com
             </a>
           </p>
+
+          {/* Copyright Notice */}
+          <div className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-600">
+            <p>Copyright &copy; 2026 Diego Albarracin</p>
+            <p>All rights reserved.</p>
+            <p className="mt-1">
+              This software is proprietary and may not be copied, modified, or
+              distributed
+              <br />
+              without explicit written permission from the author.
+            </p>
+          </div>
         </div>
       </div>
     </footer>
