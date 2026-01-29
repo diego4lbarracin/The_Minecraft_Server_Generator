@@ -379,6 +379,5 @@ without explicit written permission from the author (me 🤠).
 
 **Developed by [diego4lbarracin](https://github.com/diego4lbarracin)**
 
-[⬆ Back to Top](#the-minecraft-server-generator-)
 
 </div>
