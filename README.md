@@ -8,7 +8,7 @@ In this project I created a web application that follows an API REST architectur
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Features](#-features)
 - [Architecture](#-architecture)
@@ -22,7 +22,7 @@ In this project I created a web application that follows an API REST architectur
 
 ---
 
-## ✨ Features
+## Features
 
 ### Current Features
 
@@ -34,7 +34,7 @@ In this project I created a web application that follows an API REST architectur
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 The application follows an API Rest architecture, where the frontend-side authenticates the user using a JWT, captures and sends HTTP requests to the backend using the defined endpoint for each functionality, then the backend checks that the request is being sent by an authenticated user using a JWT as well and, if everything is correct, the backend handles the request and, using the AWS SDK for Go, turns on the EC2 instance where the server is going to be hosted, installs the required software, fetches the docker image of the Minecraft Server from Docker Hub, turns the server on using the parameters sent by the client and, if successful, sends a confirmation message with the IP address back to the backend, which handles the response and sends it back to the frontend where it is finally displayed (IP address) to the user after 2 minutes, which is approximately the time it takes the EC2 instance and the Minecraft Server to be created.
 
@@ -86,7 +86,7 @@ The application follows an API Rest architecture, where the frontend-side authen
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -120,7 +120,7 @@ The application follows an API Rest architecture, where the frontend-side authen
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 The_Minecraft_Server_Generator/
@@ -201,7 +201,7 @@ The_Minecraft_Server_Generator/
 
 ---
 
-## 🌐 Deployment
+## Deployment
 
 ### Frontend (GitHub Pages)
 
@@ -241,7 +241,7 @@ docker run -p 8080:8080 --env-file .env minecraft-server-generator-api
 
 ---
 
-## 📡 API Documentation
+## API Documentation
 
 ### Base URL
 
@@ -335,7 +335,7 @@ fetch("http://localhost:8080/minecraft/create", {
 
 ---
 
-## 🔒 Security
+## Security
 
 ### Authentication Strategy
 
@@ -353,7 +353,7 @@ fetch("http://localhost:8080/minecraft/create", {
 
 ---
 
-## 👤 Author
+## Author
 
 - **Personal Website**: [www.diego4lbarracin.com](diego4lbarracin.com)
 - **GitHub**: [@diego4lbarracin](https://github.com/diego4lbarracin)
@@ -362,7 +362,7 @@ fetch("http://localhost:8080/minecraft/create", {
 
 ---
 
-## 📞 Support
+## Support
 
 If you encounter any issues or have questions:
 
@@ -377,7 +377,7 @@ All rights reserved.
 This software is proprietary and may not be copied, modified, or distributed
 without explicit written permission from the author (me 🤠).
 
-**Built with ❤️ by [diego4lbarracin](https://github.com/diego4lbarracin)**
+**Developed by [diego4lbarracin](https://github.com/diego4lbarracin)**
 
 [⬆ Back to Top](#the-minecraft-server-generator-)
 
