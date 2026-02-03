@@ -1,3 +1,10 @@
+/*
+auth.go
+In this file you can find the definition of the methods that handle the logic related with auth,
+so multiple critical services can only be accessible by authenticated users, so no third-parties can access them
+and make my bank account go directly to zero because of infinite debt in AWS credits.
+*/
+
 package middleware
 
 import (
@@ -56,7 +63,7 @@ func parseJWKToPublicKey(jwkJSON string) (*ecdsa.PublicKey, error) {
 	return publicKey, nil
 }
 
-// AuthMiddleware validates requests using Supabase JWT tokens or API keys (IP whitelist disabled)
+// AuthMiddleware validates requests using Supabase JWT tokens or API keys.
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get configuration from environment

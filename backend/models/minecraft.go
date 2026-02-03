@@ -1,7 +1,14 @@
 package models
 
+/*
+The definition of models for servies assocciated with Minecraft services.
+*/
+
 // MinecraftServerRequest represents the request to create a Minecraft server
 type MinecraftServerRequest struct {
+	// User Information
+	UserEmail     string `json:"user_email"`                // User's email address for server naming
+	
 	// Server Configuration
 	ServerName    string `json:"server_name"`               // Name tag for the EC2 instance
 	MinecraftType string `json:"minecraft_type"`            // vanilla, spigot, paper, forge, fabric, etc.
@@ -81,7 +88,7 @@ func (r *MinecraftServerRequest) SetDefaults() {
 		r.Memory = "1G"
 	}
 	if r.InstanceType == "" {
-		r.InstanceType = "t3.small"
+		r.InstanceType = "t3.medium"
 	}
 	if r.MOTD == "" {
 		r.MOTD = "A Minecraft Server"

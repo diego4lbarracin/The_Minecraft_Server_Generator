@@ -1,6 +1,14 @@
+/*
+minecraft_handler.go
+In this file, you'll find the defintion of handlers built to control request to endpoints
+associated with creating a new Minecraft Server.
+*/
+
 package handlers
 
+//Importing the necessary libraries.
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os/exec"
@@ -11,22 +19,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 type MinecraftHandler struct {
 	minecraftService *services.MinecraftService
 }
 
-// NewMinecraftHandler creates a new Minecraft handler
+// NewMinecraftHandler() => creates a new Minecraft handler and returns an object (struct) of type MinecraftHandler (defined in line 22).
 func NewMinecraftHandler(minecraftService *services.MinecraftService) *MinecraftHandler {
 	return &MinecraftHandler{
 		minecraftService: minecraftService,
 	}
 }
 
-// CreateMinecraftServer handles POST /minecraft/create
+/* 
+POST - CreateMinecraftServer() => This method handles POST requests to the endpoint /minecraft/create, whose request body includes
+the parameters that are necessary to create a new mineraft server (basically information that can be changed in the server.properties file).
+*/
 func (h *MinecraftHandler) CreateMinecraftServer(c *gin.Context) {
-	var req models.MinecraftServerRequest
+	var req models.MinecraftServerRequest //Initializing a variable of type MinecraftServerRequest, whose definition can be found at /models/minecraft.go
 
-	// Parse request body
+	// Binding the information in the request body to match the structure in the var req.
 	if err := c.ShouldBindJSON(&req); err != nil {
 		log.Printf("Invalid request body: %v", err)
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
@@ -36,16 +48,21 @@ func (h *MinecraftHandler) CreateMinecraftServer(c *gin.Context) {
 		return
 	}
 
-	// Validate server name
+	// Setting the req.ServerName to "minecraft-server" as default if it is not specified in the request body.
 	if req.ServerName == "" {
 		req.ServerName = "minecraft-server"
 	}
 
+	// Log to terminal, so the admin knows that a request to create a Minecraft Server.
 	log.Printf("Received request to create Minecraft server: %s (Type: %s, Version: %s)", 
 		req.ServerName, req.MinecraftType, req.Version)
 
-	// Create the Minecraft server
+	/* Executing the method CreateMinecraftServer() defined at /services/minecraftService.go using as parameter the information obtained 
+	from the request body and stored in the var req. The method returns an object (struct) of type MinecraftServerResponse (whose 
+	definition can be found at /models/minecraft) and is currently stored in server. If not successful, the service method returns an error.
+	*/
 	server, err := h.minecraftService.CreateMinecraftServer(req)
+	//If an error is returned from the CreateMinecraftServer() service, then it is displayed as log on the terminal.
 	if err != nil {
 		log.Printf("Failed to create Minecraft server: %v", err)
 		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
@@ -54,17 +71,19 @@ func (h *MinecraftHandler) CreateMinecraftServer(c *gin.Context) {
 		})
 		return
 	}
-
+	//Log to the terminal if the server was created successfully.
 	log.Printf("Successfully created Minecraft server: %s (IP: %s)", server.InstanceID, server.PublicIP)
 
-	// Return success response
+	// Return success response.
 	c.JSON(http.StatusCreated, server)
 }
 
-// GetServerInfo handles GET /minecraft/info/:instance_id
+// GET - GetServerInfo() => Handles GET /minecraft/info/:instance_id
 func (h *MinecraftHandler) GetServerInfo(c *gin.Context) {
+	//Binds the parameter obtained from the request body and stores it in instanceID.
 	instanceID := c.Param("instance_id")
 	
+	//Error handling if the parameter in the request body is missing.
 	if instanceID == "" {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Error:   "Invalid Request",
@@ -73,18 +92,63 @@ func (h *MinecraftHandler) GetServerInfo(c *gin.Context) {
 		return
 	}
 
-	// TODO: Implement fetching server info from EC2
-	c.JSON(http.StatusNotImplemented, models.ErrorResponse{
-		Error:   "Not Implemented",
-		Message: "This endpoint is coming soon",
-	})
+	// Fetch instance information from EC2
+	log.Printf("Fetching information for instance: %s", instanceID)
+	
+	instanceInfo, err := h.minecraftService.GetInstanceInfo(instanceID)
+	if err != nil {
+		log.Printf("Failed to get instance info: %v", err)
+		c.JSON(http.StatusNotFound, models.ErrorResponse{
+			Error:   "Instance Not Found",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Build Minecraft server response
+	response := models.MinecraftServerResponse{
+		InstanceID:       instanceInfo.InstanceID,
+		PublicIP:         instanceInfo.PublicIP,
+		PrivateIP:        instanceInfo.PrivateIP,
+		State:            instanceInfo.State,
+		InstanceType:     instanceInfo.InstanceType,
+		LaunchTime:       instanceInfo.LaunchTime,
+		AvailabilityZone: instanceInfo.AvailabilityZone,
+		ServerPort:       25565,
+		ServerAddress:    fmt.Sprintf("%s:25565", instanceInfo.PublicIP),
+		Message:          fmt.Sprintf("Instance is %s", instanceInfo.State),
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
-// HealthCheck handles GET /minecraft/health
+// GET HealthCheck() => Handles request GET /minecraft/health
 func (h *MinecraftHandler) HealthCheck(c *gin.Context) {
+	// Try to list all instances to verify service is working
+	instances, err := h.minecraftService.ListAllInstances()
+	if err != nil {
+		log.Printf("Minecraft service health check failed: %v", err)
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":  "unhealthy",
+			"service": "minecraft-server-manager",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	// Count Minecraft servers (instances with Type=MinecraftServer tag)
+	minecraftServers := 0
+	for range instances {
+		// In a full implementation, you'd check the tags here
+		minecraftServers++
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"status":  "healthy",
-		"service": "minecraft-server-manager",
+		"status":            "healthy",
+		"service":           "minecraft-server-manager",
+		"total_instances":   len(instances),
+		"minecraft_servers": minecraftServers,
+		"aws_connected":     true,
 	})
 }
 
@@ -94,7 +158,7 @@ func (h *MinecraftHandler) TestServerCreation(c *gin.Context) {
 	log.Println("Executing test_minecraft_api.ps1 script...")
 
 	// Execute PowerShell script
-	cmd := exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", "./test_minecraft_api.ps1")
+	cmd := exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", "./scripts/test_minecraft_api.ps1")
 	
 	output, err := cmd.CombinedOutput()
 	if err != nil {

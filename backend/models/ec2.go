@@ -1,5 +1,9 @@
 package models
 
+/*
+The definition of models for servies assocciated with EC2 services.
+*/
+
 // EC2InstanceRequest represents the request body for creating an EC2 instance
 type EC2InstanceRequest struct {
 	InstanceType string `json:"instance_type" binding:"required"`
