@@ -1,17 +1,153 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Footer from "../components/Footer";
+import CreateServerForm from "../components/CreateServerForm";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { user, signOut, getAuthToken } = useAuth();
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [minecraftVersions, setMinecraftVersions] = useState([]);
+  const [versionsLoading, setVersionsLoading] = useState(true);
+
+  // Form state
+  const [formData, setFormData] = useState({
+    serverName: "",
+    minecraftType: "VANILLA",
+    version: "LATEST",
+    gamemode: "survival",
+    difficulty: "normal",
+    seed: "",
+    welcomeChest: false,
+    allowCrackedPlayers: false,
+  });
+
+  // Fetch Minecraft versions from backend
+  useEffect(() => {
+    const fetchVersions = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/versions");
+        if (response.ok) {
+          const data = await response.json();
+          setMinecraftVersions(data.versions || []);
+        } else {
+          console.error("Failed to fetch versions");
+        }
+      } catch (error) {
+        console.error("Error fetching versions:", error);
+      } finally {
+        setVersionsLoading(false);
+      }
+    };
+
+    fetchVersions();
+  }, []);
 
   const handleLogout = async () => {
     navigate("/");
     await signOut();
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const isFormValid = () => {
+    return (
+      formData.serverName.trim() !== "" &&
+      formData.minecraftType !== "" &&
+      formData.version !== "" &&
+      formData.gamemode !== "" &&
+      formData.difficulty !== ""
+    );
+  };
+
+  const handleCreateCustomServer = async () => {
+    if (!isFormValid()) return;
+
+    setIsCreating(true);
+    setError("");
+
+    try {
+      const token = await getAuthToken();
+
+      if (!token) {
+        throw new Error("Not authenticated. Please log in again.");
+      }
+
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      const response = await fetch(`${apiUrl}/minecraft/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          user_email: user?.email,
+          eula: true,
+          server_name: formData.serverName,
+          minecraft_type: formData.minecraftType,
+          version: formData.version,
+          gamemode: formData.gamemode,
+          difficulty: formData.difficulty,
+          level_seed: formData.seed || undefined,
+          welcome_chest: formData.welcomeChest,
+          online_mode: !formData.allowCrackedPlayers,
+          motd: `${formData.serverName} - Welcome!`,
+          max_players: 20,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create server");
+      }
+
+      const data = await response.json();
+      console.log("Server created:", data);
+
+      // Open new tab with server status page
+      const params = new URLSearchParams({
+        instanceId: data.instance_id,
+        publicIp: data.public_ip,
+        serverAddress: data.server_address,
+        serverName: data.server_name,
+        minecraftVersion: data.minecraft_version,
+        serverType: data.server_type,
+      });
+
+      const basePath =
+        import.meta.env.VITE_GITHUB_PAGES === "true"
+          ? "/The_Minecraft_Server_Generator"
+          : "";
+      window.open(`${basePath}/server-status?${params.toString()}`, "_blank");
+
+      // Reset form
+      setFormData({
+        serverName: "",
+        minecraftType: "VANILLA",
+        version: "LATEST",
+        gamemode: "survival",
+        difficulty: "normal",
+        seed: "",
+        welcomeChest: false,
+        allowCrackedPlayers: false,
+      });
+      setShowCreateForm(false);
+    } catch (err) {
+      console.error("Error creating server:", err);
+      setError(err.message || "Failed to create server. Please try again.");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleRunScript = async () => {
@@ -254,21 +390,53 @@ const DashboardPage = () => {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-50 cursor-not-allowed">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">
-                    Create New Server
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Deploy a new Minecraft server instance
-                  </p>
-                </div>
-                <button
-                  disabled
-                  className="btn-secondary opacity-50 cursor-not-allowed"
+              {/* Create New Server Section */}
+              <div>
+                <div
+                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => setShowCreateForm(!showCreateForm)}
                 >
-                  Coming Soon
-                </button>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      Create New Server
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Deploy a custom Minecraft server instance
+                    </p>
+                  </div>
+                  <button className="btn-secondary flex items-center space-x-2">
+                    <svg
+                      className={`w-5 h-5 transform transition-transform ${
+                        showCreateForm ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                    <span>{showCreateForm ? "Hide" : "Show"}</span>
+                  </button>
+                </div>
+
+                {/* Create Server Form */}
+                {showCreateForm && (
+                  <CreateServerForm
+                    formData={formData}
+                    onChange={handleFormChange}
+                    onSubmit={handleCreateCustomServer}
+                    isCreating={isCreating}
+                    isValid={isFormValid()}
+                    error={error}
+                    minecraftVersions={minecraftVersions}
+                    versionsLoading={versionsLoading}
+                  />
+                )}
               </div>
 
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-50 cursor-not-allowed">

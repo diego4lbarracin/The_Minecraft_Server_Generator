@@ -49,6 +49,10 @@ func main() {
 	// Initialize Minecraft Service
 	minecraftService := services.NewMinecraftService(ec2Service)
 
+	// Initialize Version Service and start auto-refresh
+	versionService := services.GetVersionService()
+	versionService.StartAutoRefresh()
+
 	// Initialize Handlers: Handles the requests and responses from HTTP requests and call the appropriate service methods.
 	ec2Handler := handlers.NewEC2Handler(ec2Service)
 	minecraftHandler := handlers.NewMinecraftHandler(minecraftService)
@@ -78,6 +82,9 @@ func main() {
 		minecraftRoutes.DELETE("/stop/:instance_id", middleware.AuthMiddleware(), minecraftHandler.StopServer)
 		minecraftRoutes.POST("/test", middleware.AuthMiddleware(), minecraftHandler.TestServerCreation)
 	}
+
+	// Register version routes (public endpoint)
+	router.GET("/versions", handlers.GetMinecraftVersions)
 
 	// Obtain the PORT from the .ENV file and store it inside the port variable.
 	port := os.Getenv("PORT")

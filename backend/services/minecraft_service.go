@@ -210,6 +210,11 @@ func (s *MinecraftService) generateUserDataScript(req models.MinecraftServerRequ
 		fmt.Sprintf("ENABLE_COMMAND_BLOCK=%t", req.EnableCommand),
 	}
 
+	// Add welcome chest if enabled
+	if req.WelcomeChest {
+		envVars = append(envVars, "ALLOW_INITIAL_ENABLED_PACKS=TRUE")
+	}
+
 	if req.LevelSeed != "" {
 		envVars = append(envVars, fmt.Sprintf("SEED=%s", req.LevelSeed))
 	}

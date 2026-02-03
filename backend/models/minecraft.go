@@ -27,6 +27,7 @@ type MinecraftServerRequest struct {
 	EnableCommand bool   `json:"enable_command_block"`     // Enable command blocks
 	PVP           bool   `json:"pvp"`                       // Enable PVP
 	OnlineMode    bool   `json:"online_mode"`               // Online mode (authentication)
+	WelcomeChest  bool   `json:"welcome_chest"`             // Enable welcome chest with starter items
 	
 	// Mods/Plugins (optional)
 	ModPackURL    string   `json:"modpack_url"`             // URL to modpack zip file

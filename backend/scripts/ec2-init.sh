@@ -91,7 +91,7 @@ while true; do
     if echo "$recent_logs" | grep -q "Server empty for 60 seconds, pausing"; then
         if [ $server_empty_time -eq 0 ]; then
             # First time seeing this message - start countdown
-            server_empty_time=$(date +%s)
+            server_empty_time=$(date +%%s)
             echo "$(date): Server empty detected! Will terminate in $SHUTDOWN_DELAY seconds..." >> "$LOG_FILE"
         fi
     fi
@@ -104,7 +104,7 @@ while true; do
             server_empty_time=0
         else
             # No one joined - continue countdown
-            current_time=$(date +%s)
+            current_time=$(date +%%s)
             elapsed=$((current_time - server_empty_time))
             
             if [ $elapsed -ge $SHUTDOWN_DELAY ]; then
