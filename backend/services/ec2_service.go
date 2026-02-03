@@ -335,3 +335,20 @@ func (s *EC2Service) ListAllInstances() ([]models.EC2InstanceResponse, error) {
 
 	return instances, nil
 }
+
+// StopInstance stops a running EC2 instance
+func (s *EC2Service) StopInstance(instanceID string) error {
+	ctx := context.TODO()
+
+	input := &ec2.StopInstancesInput{
+		InstanceIds: []string{instanceID},
+	}
+
+	_, err := s.client.StopInstances(ctx, input)
+	if err != nil {
+		return fmt.Errorf("failed to stop instance: %v", err)
+	}
+
+	log.Printf("Successfully stopped instance: %s", instanceID)
+	return nil
+}

@@ -224,3 +224,35 @@ func extractIPFromOutput(output string) string {
 	}
 	return ""
 }
+
+// DELETE - StopServer() => Handles DELETE /minecraft/stop/:instance_id
+func (h *MinecraftHandler) StopServer(c *gin.Context) {
+	instanceID := c.Param("instance_id")
+	
+	if instanceID == "" {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Error:   "Invalid Request",
+			Message: "instance_id is required",
+		})
+		return
+	}
+
+	log.Printf("Stopping Minecraft server instance: %s", instanceID)
+
+	err := h.minecraftService.StopInstance(instanceID)
+	if err != nil {
+		log.Printf("Failed to stop instance: %v", err)
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Error:   "Failed to Stop Server",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	log.Printf("Successfully stopped instance: %s", instanceID)
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Server stopped successfully",
+		"instance_id": instanceID,
+	})
+}

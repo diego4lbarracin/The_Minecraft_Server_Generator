@@ -330,3 +330,8 @@ func (s *MinecraftService) GetInstanceInfo(instanceID string) (*models.EC2Instan
 func (s *MinecraftService) ListAllInstances() ([]models.EC2InstanceResponse, error) {
 	return s.ec2Service.ListAllInstances()
 }
+
+// StopInstance stops a running EC2 instance
+func (s *MinecraftService) StopInstance(instanceID string) error {
+	return s.ec2Service.StopInstance(instanceID)
+}

@@ -75,6 +75,7 @@ func main() {
 		// Protected routes (auth required): As explained in line 60, only auth users are allowed to access the following endpoints.
 		minecraftRoutes.POST("/create", middleware.AuthMiddleware(), minecraftHandler.CreateMinecraftServer)
 		minecraftRoutes.GET("/info/:instance_id", middleware.AuthMiddleware(), minecraftHandler.GetServerInfo)
+		minecraftRoutes.DELETE("/stop/:instance_id", middleware.AuthMiddleware(), minecraftHandler.StopServer)
 		minecraftRoutes.POST("/test", middleware.AuthMiddleware(), minecraftHandler.TestServerCreation)
 	}
 

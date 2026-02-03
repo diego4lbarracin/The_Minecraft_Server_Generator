@@ -35,6 +35,7 @@ const DashboardPage = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          user_email: user?.email, // Add user email for server naming
           eula: true,
           server_name: `minecraft-${Date.now()}`,
           minecraft_type: "VANILLA",
