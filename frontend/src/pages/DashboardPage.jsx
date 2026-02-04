@@ -83,6 +83,16 @@ const DashboardPage = () => {
         throw new Error("Not authenticated. Please log in again.");
       }
 
+      // Debug logging
+      console.log(
+        "DEBUG Frontend: allowCrackedPlayers =",
+        formData.allowCrackedPlayers,
+      );
+      console.log(
+        "DEBUG Frontend: online_mode will be sent as =",
+        !formData.allowCrackedPlayers,
+      );
+
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
       const response = await fetch(`${apiUrl}/minecraft/create`, {
         method: "POST",
@@ -102,7 +112,7 @@ const DashboardPage = () => {
           welcome_chest: formData.welcomeChest,
           online_mode: !formData.allowCrackedPlayers,
           motd: `${formData.serverName} - Welcome!`,
-          max_players: 20,
+          max_players: 10,
         }),
       });
 
@@ -176,7 +186,7 @@ const DashboardPage = () => {
           server_name: `minecraft-${Date.now()}`,
           minecraft_type: "VANILLA",
           version: "LATEST",
-          max_players: 20,
+          max_players: 10,
           gamemode: "survival",
           difficulty: "normal",
           motd: "Server created from dashboard!",

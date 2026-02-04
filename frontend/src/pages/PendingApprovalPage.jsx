@@ -33,7 +33,7 @@ const PendingApprovalPage = () => {
       <div className="card max-w-md w-full text-center">
         <div className="mb-6">
           <svg
-            className="w-24 h-24 mx-auto text-yellow-500 mb-4"
+            className="w-24 h-24 mx-auto text-minecraft-green mb-4"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

@@ -195,6 +195,9 @@ func (s *MinecraftService) CreateMinecraftServer(req models.MinecraftServerReque
 
 // generateUserDataScript creates a cloud-init script to install Docker and run Minecraft
 func (s *MinecraftService) generateUserDataScript(req models.MinecraftServerRequest) string {
+	// Log the OnlineMode value for debugging
+	log.Printf("DEBUG: OnlineMode value received: %t", req.OnlineMode)
+	
 	// Build environment variables for the Docker container
 	envVars := []string{
 		fmt.Sprintf("EULA=%t", req.EULA),
@@ -202,21 +205,24 @@ func (s *MinecraftService) generateUserDataScript(req models.MinecraftServerRequ
 		fmt.Sprintf("VERSION=%s", req.Version),
 		fmt.Sprintf("MEMORY=%s", req.Memory),
 		fmt.Sprintf("MAX_PLAYERS=%d", req.MaxPlayers),
-		fmt.Sprintf("MOTD=%s", req.MOTD),
+		fmt.Sprintf("MOTD=\"%s\"", req.MOTD),  // Quote MOTD to handle spaces
 		fmt.Sprintf("DIFFICULTY=%s", req.Difficulty),
 		fmt.Sprintf("MODE=%s", req.Gamemode),
 		fmt.Sprintf("PVP=%t", req.PVP),
 		fmt.Sprintf("ONLINE_MODE=%t", req.OnlineMode),
 		fmt.Sprintf("ENABLE_COMMAND_BLOCK=%t", req.EnableCommand),
+		"OP_PERMISSION_LEVEL=2",  // Set default OP permission level to 2
 	}
+	
+	log.Printf("DEBUG: Environment variables being set: %v", envVars)
 
-	// Add welcome chest if enabled
-	if req.WelcomeChest {
-		envVars = append(envVars, "ALLOW_INITIAL_ENABLED_PACKS=TRUE")
-	}
+	// Note: WelcomeChest feature is not supported by docker-minecraft-server
+	// The INITIAL_ENABLED_PACKS environment variable is for datapacks with feature flags,
+	// not for welcome chests. This feature would require a custom plugin/datapack.
+	// Removing the incorrect implementation.
 
 	if req.LevelSeed != "" {
-		envVars = append(envVars, fmt.Sprintf("SEED=%s", req.LevelSeed))
+		envVars = append(envVars, fmt.Sprintf("SEED=\"%s\"", req.LevelSeed))  // Quote SEED for negative values
 	}
 	if req.LevelName != "" {
 		envVars = append(envVars, fmt.Sprintf("LEVEL=%s", req.LevelName))
@@ -224,19 +230,23 @@ func (s *MinecraftService) generateUserDataScript(req models.MinecraftServerRequ
 
 	// Add modpack URL if provided
 	if req.ModPackURL != "" {
-		envVars = append(envVars, fmt.Sprintf("MODPACK=%s", req.ModPackURL))
+		envVars = append(envVars, fmt.Sprintf("MODPACK=\"%s\"", req.ModPackURL))  // Quote URL
 	}
 
 	// Add plugin URLs if provided
 	if len(req.PluginURLs) > 0 {
-		envVars = append(envVars, fmt.Sprintf("PLUGINS=%s", strings.Join(req.PluginURLs, ",")))
+		envVars = append(envVars, fmt.Sprintf("PLUGINS=\"%s\"", strings.Join(req.PluginURLs, ",")))  // Quote plugin URLs
 	}
 
 	// Build Docker run command environment flags
 	dockerEnvFlags := ""
 	for _, env := range envVars {
-		dockerEnvFlags += fmt.Sprintf(" -e \"%s\"", env)
+		// Don't add extra quotes around the environment variable
+		// Docker -e flag handles: -e KEY=VALUE
+		dockerEnvFlags += fmt.Sprintf(" -e %s", env)
 	}
+	
+	log.Printf("DEBUG: Docker environment flags: %s", dockerEnvFlags)
 
 	// Read the EC2 initialization script from file
 	scriptPath := filepath.Join("scripts", "ec2-init.sh")

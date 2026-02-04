@@ -48,6 +48,10 @@ func (h *MinecraftHandler) CreateMinecraftServer(c *gin.Context) {
 		return
 	}
 
+	// DEBUG: Log the raw request body and parsed OnlineMode value
+	log.Printf("DEBUG Handler: OnlineMode value after JSON binding: %t", req.OnlineMode)
+	log.Printf("DEBUG Handler: PVP value: %t, EnableCommand value: %t", req.PVP, req.EnableCommand)
+
 	// Setting the req.ServerName to "minecraft-server" as default if it is not specified in the request body.
 	if req.ServerName == "" {
 		req.ServerName = "minecraft-server"

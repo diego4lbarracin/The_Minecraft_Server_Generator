@@ -27,7 +27,7 @@ type MinecraftServerRequest struct {
 	EnableCommand bool   `json:"enable_command_block"`     // Enable command blocks
 	PVP           bool   `json:"pvp"`                       // Enable PVP
 	OnlineMode    bool   `json:"online_mode"`               // Online mode (authentication)
-	WelcomeChest  bool   `json:"welcome_chest"`             // Enable welcome chest with starter items
+	WelcomeChest  bool   `json:"welcome_chest"`             // Note: Not supported by docker-minecraft-server (kept for future plugin implementation)
 	
 	// Mods/Plugins (optional)
 	ModPackURL    string   `json:"modpack_url"`             // URL to modpack zip file
@@ -92,11 +92,6 @@ func (r *MinecraftServerRequest) SetDefaults() {
 	if r.MOTD == "" {
 		r.MOTD = "A server created using The Minecraft Server Generator :D"
 	}
-	// PVP and OnlineMode default to true
-	if !r.PVP {
-		r.PVP = true
-	}
-	if !r.OnlineMode {
-		r.OnlineMode = true
-	}
+	// Note: PVP and OnlineMode are set explicitly from frontend, no defaults needed
+	// Leaving them unset here allows frontend to control these boolean values
 }

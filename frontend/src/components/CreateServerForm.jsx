@@ -228,42 +228,50 @@ const CreateServerForm = ({
         />
       </div>
 
-      {/* Welcome Chest */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-        <div className="flex items-center space-x-2">
-          <label className="text-sm font-semibold text-gray-700">
-            Welcome Chest
-          </label>
-          <div className="group relative">
-            <svg
-              className="w-4 h-4 text-gray-400 cursor-help"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-48 pointer-events-none z-10">
-              Gives new players a chest with starter items on first join
+      {/* Welcome Chest - Temporarily hidden */}
+      {false && (
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-50">
+          <div className="flex items-center space-x-2">
+            <label className="text-sm font-semibold text-gray-700">
+              Welcome Chest
+              <span className="ml-2 text-xs text-red-600 font-normal">
+                (Not Supported)
+              </span>
+            </label>
+            <div className="group relative">
+              <svg
+                className="w-4 h-4 text-gray-400 cursor-help"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-64 pointer-events-none z-10">
+                This feature is not supported by docker-minecraft-server. Would
+                require a custom plugin/datapack to implement starter items for
+                new players.
+              </div>
             </div>
           </div>
+          <label className="relative inline-flex items-center cursor-not-allowed">
+            <input
+              type="checkbox"
+              name="welcomeChest"
+              checked={formData.welcomeChest}
+              onChange={onChange}
+              disabled
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-minecraft-green"></div>
+          </label>
         </div>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            name="welcomeChest"
-            checked={formData.welcomeChest}
-            onChange={onChange}
-            className="sr-only peer"
-          />
-          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-minecraft-green"></div>
-        </label>
-      </div>
+      )}
 
       {/* Allow Cracked Players */}
       <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">

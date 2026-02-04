@@ -15,8 +15,8 @@ export default {
         },
       },
       fontFamily: {
-        minecraft: ['"Press Start 2P"', "cursive"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        minecraft: ['"Minecraft"', "monospace"],
+        sans: ['"Minecraft"', "monospace"],
       },
     },
   },

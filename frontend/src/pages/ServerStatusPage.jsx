@@ -9,7 +9,7 @@ const ServerStatusPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { getAuthToken } = useAuth();
-  const [timeRemaining, setTimeRemaining] = useState(0); // 0 seconds for testing
+  const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes = 120 seconds
   const [showIP, setShowIP] = useState(false);
   const [serverData, setServerData] = useState(null);
   const [isActive, setIsActive] = useState(false);
@@ -19,6 +19,7 @@ const ServerStatusPage = () => {
   const [isStopping, setIsStopping] = useState(false);
   const [userStoppedServer, setUserStoppedServer] = useState(false);
   const [showInactivityAlert, setShowInactivityAlert] = useState(false);
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
   useEffect(() => {
     // Get server data from URL params
@@ -106,6 +107,8 @@ const ServerStatusPage = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
+    setShowCopiedMessage(true);
+    setTimeout(() => setShowCopiedMessage(false), 2000);
   };
 
   const handleStopServer = () => {
@@ -359,7 +362,7 @@ const ServerStatusPage = () => {
                   <p className="text-sm text-gray-600 mb-1">Server Address</p>
                   <div className="flex items-center justify-between">
                     <p
-                      className={`text-xl font-mono font-bold text-minecraft-green ${!isActive ? "blur-sm select-none" : ""}`}
+                      className={`text-xl font-bold text-minecraft-green ${!isActive ? "blur-sm select-none" : ""}`}
                     >
                       {serverData?.serverAddress || "N/A"}
                     </p>
@@ -373,6 +376,11 @@ const ServerStatusPage = () => {
                       Copy
                     </button>
                   </div>
+                  {showCopiedMessage && (
+                    <div className="mt-2 text-sm text-minecraft-green font-bold animate-fade-in-out">
+                      IP address copied to clipboard
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -451,7 +459,7 @@ const ServerStatusPage = () => {
                     <div className="flex items-start space-x-4">
                       <div className="flex-shrink-0">
                         <svg
-                          className="w-6 h-6 text-yellow-500"
+                          className="w-6 h-6 text-minecraft-green"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"

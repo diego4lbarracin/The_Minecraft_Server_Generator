@@ -5,7 +5,7 @@ const ConfirmDialog = ({ message, onConfirm, onCancel }) => {
         <div className="flex items-start space-x-4">
           <div className="flex-shrink-0">
             <svg
-              className="w-6 h-6 text-yellow-500"
+              className="w-6 h-6 text-minecraft-green"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
