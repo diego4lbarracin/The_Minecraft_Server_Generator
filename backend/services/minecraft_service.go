@@ -1,10 +1,18 @@
+/*
+minecraft_service.go
+In this file you will find the definition of the logic of the different methods that are needed to
+create a Minecraft Server Successfully.
+*/
 package services
 
+//Libraries that are currently needed for this service.
 import (
 	"context"
 	"encoding/base64"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -14,27 +22,41 @@ import (
 	"github.com/diego4lbarracin/The_Minecraft_Server_Generator/models"
 )
 
+//Structure that defines that a MinecraftService, which is in fact a instance of an object of type ec2_sercice as well.
+//Basically, it includes the definition of the different methods that are currently in ec2_service.go
 type MinecraftService struct {
 	ec2Service *EC2Service
 }
 
-// NewMinecraftService creates a new Minecraft service instance
+// NewMinecraftService() creates a new Minecraft service instance
 func NewMinecraftService(ec2Service *EC2Service) *MinecraftService {
 	return &MinecraftService{
 		ec2Service: ec2Service,
 	}
 }
 
-// CreateMinecraftServer creates an EC2 instance with Docker and Minecraft server
+// CreateMinecraftServer() => creates an EC2 instance with Docker and Minecraft server
 func (s *MinecraftService) CreateMinecraftServer(req models.MinecraftServerRequest) (*models.MinecraftServerResponse, error) {
 	// Set defaults
 	req.SetDefaults()
+
+	// Set server name based on user email if not provided
+	if req.ServerName == "" && req.UserEmail != "" {
+		req.ServerName = fmt.Sprintf("MC-SERVER@%s", req.UserEmail)
+	} else if req.ServerName == "" {
+		req.ServerName = fmt.Sprintf("MC-SERVER@%s", time.Now().Format("20060102-150405"))
+	}
+
+	// Set default key name from environment if not provided
+	if req.KeyName == "" {
+		req.KeyName = os.Getenv("DEFAULT_KEY_NAME")
+	}
 
 	// Validate EULA
 	if !req.EULA {
 		return nil, fmt.Errorf("you must accept the Minecraft EULA by setting 'eula' to true")
 	}
-
+	//Log to the terminal.
 	log.Printf("Creating Minecraft server: %s (Type: %s, Version: %s)", req.ServerName, req.MinecraftType, req.Version)
 
 	// Get latest Amazon Linux 2023 AMI
@@ -173,6 +195,9 @@ func (s *MinecraftService) CreateMinecraftServer(req models.MinecraftServerReque
 
 // generateUserDataScript creates a cloud-init script to install Docker and run Minecraft
 func (s *MinecraftService) generateUserDataScript(req models.MinecraftServerRequest) string {
+	// Log the OnlineMode value for debugging
+	log.Printf("DEBUG: OnlineMode value received: %t", req.OnlineMode)
+	
 	// Build environment variables for the Docker container
 	envVars := []string{
 		fmt.Sprintf("EULA=%t", req.EULA),
@@ -180,16 +205,24 @@ func (s *MinecraftService) generateUserDataScript(req models.MinecraftServerRequ
 		fmt.Sprintf("VERSION=%s", req.Version),
 		fmt.Sprintf("MEMORY=%s", req.Memory),
 		fmt.Sprintf("MAX_PLAYERS=%d", req.MaxPlayers),
-		fmt.Sprintf("MOTD=%s", req.MOTD),
+		fmt.Sprintf("MOTD=\"%s\"", req.MOTD),  // Quote MOTD to handle spaces
 		fmt.Sprintf("DIFFICULTY=%s", req.Difficulty),
 		fmt.Sprintf("MODE=%s", req.Gamemode),
 		fmt.Sprintf("PVP=%t", req.PVP),
 		fmt.Sprintf("ONLINE_MODE=%t", req.OnlineMode),
 		fmt.Sprintf("ENABLE_COMMAND_BLOCK=%t", req.EnableCommand),
+		"OP_PERMISSION_LEVEL=2",  // Set default OP permission level to 2
 	}
+	
+	log.Printf("DEBUG: Environment variables being set: %v", envVars)
+
+	// Note: WelcomeChest feature is not supported by docker-minecraft-server
+	// The INITIAL_ENABLED_PACKS environment variable is for datapacks with feature flags,
+	// not for welcome chests. This feature would require a custom plugin/datapack.
+	// Removing the incorrect implementation.
 
 	if req.LevelSeed != "" {
-		envVars = append(envVars, fmt.Sprintf("SEED=%s", req.LevelSeed))
+		envVars = append(envVars, fmt.Sprintf("SEED=\"%s\"", req.LevelSeed))  // Quote SEED for negative values
 	}
 	if req.LevelName != "" {
 		envVars = append(envVars, fmt.Sprintf("LEVEL=%s", req.LevelName))
@@ -197,171 +230,37 @@ func (s *MinecraftService) generateUserDataScript(req models.MinecraftServerRequ
 
 	// Add modpack URL if provided
 	if req.ModPackURL != "" {
-		envVars = append(envVars, fmt.Sprintf("MODPACK=%s", req.ModPackURL))
+		envVars = append(envVars, fmt.Sprintf("MODPACK=\"%s\"", req.ModPackURL))  // Quote URL
 	}
 
 	// Add plugin URLs if provided
 	if len(req.PluginURLs) > 0 {
-		envVars = append(envVars, fmt.Sprintf("PLUGINS=%s", strings.Join(req.PluginURLs, ",")))
+		envVars = append(envVars, fmt.Sprintf("PLUGINS=\"%s\"", strings.Join(req.PluginURLs, ",")))  // Quote plugin URLs
 	}
 
-	// Build Docker run command
+	// Build Docker run command environment flags
 	dockerEnvFlags := ""
 	for _, env := range envVars {
-		dockerEnvFlags += fmt.Sprintf(" -e \"%s\"", env)
+		// Don't add extra quotes around the environment variable
+		// Docker -e flag handles: -e KEY=VALUE
+		dockerEnvFlags += fmt.Sprintf(" -e %s", env)
+	}
+	
+	log.Printf("DEBUG: Docker environment flags: %s", dockerEnvFlags)
+
+	// Read the EC2 initialization script from file
+	scriptPath := filepath.Join("scripts", "ec2-init.sh")
+	scriptContent, err := os.ReadFile(scriptPath)
+	if err != nil {
+		log.Printf("Error reading EC2 init script: %v. Using fallback script.", err)
+		// Fallback to a minimal script if file read fails
+		return `#!/bin/bash
+echo "Error: Could not load EC2 initialization script" >> /var/log/minecraft-setup.log
+exit 1`
 	}
 
-	// Cloud-init user data script
-	userData := fmt.Sprintf(`#!/bin/bash
-set -e
-
-# Update system
-yum update -y
-
-# Install Docker
-yum install -y docker
-
-# Start Docker service
-systemctl start docker
-systemctl enable docker
-
-# Add ec2-user to docker group
-usermod -a -G docker ec2-user
-
-# Pull the Minecraft server Docker image
-docker pull itzg/minecraft-server:latest
-
-# Create directory for Minecraft data
-mkdir -p /opt/minecraft-data
-chown 1000:1000 /opt/minecraft-data
-
-# Run Minecraft server container
-docker run -d \
-  --name minecraft-server \
-  --restart unless-stopped \
-  -p 25565:25565 \
-  -v /opt/minecraft-data:/data \
-%s \
-  itzg/minecraft-server
-
-# Log the container status
-echo "Minecraft server container started" >> /var/log/minecraft-setup.log
-docker logs minecraft-server >> /var/log/minecraft-setup.log 2>&1
-
-# Install AWS CLI v2 for auto-shutdown
-yum install -y unzip
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -q /tmp/awscliv2.zip -d /tmp
-/tmp/aws/install
-rm -rf /tmp/aws /tmp/awscliv2.zip
-
-# Create auto-shutdown monitor script
-cat > /usr/local/bin/minecraft-auto-shutdown.sh << 'EOF'
-#!/bin/bash
-SHUTDOWN_DELAY=300
-CHECK_INTERVAL=10
-LOG_FILE="/var/log/minecraft-auto-shutdown.log"
-REGION="us-east-1"
-
-echo "$(date): Auto-shutdown monitor started (300 second delay after server empty)" >> "$LOG_FILE"
-
-# Get IMDSv2 token
-TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -s)
-
-# Retry metadata fetch up to 30 times (30 seconds)
-for i in {1..30}; do
-    INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
-    if [ -n "$INSTANCE_ID" ]; then
-        break
-    fi
-    sleep 1
-done
-
-if [ -z "$INSTANCE_ID" ]; then
-    echo "$(date): ERROR - Could not retrieve instance ID from metadata service!" >> "$LOG_FILE"
-    exit 1
-fi
-
-echo "$(date): Instance $INSTANCE_ID in region $REGION" >> "$LOG_FILE"
-
-# Wait for Minecraft server to fully start (reduced from 180 to 60 seconds)
-sleep 60
-
-echo "$(date): Monitoring for 'Server empty for 60 seconds, pausing' message..." >> "$LOG_FILE"
-
-server_empty_time=0
-
-while true; do
-    if ! docker ps | grep -q minecraft-server; then
-        echo "$(date): Container stopped, terminating..." >> "$LOG_FILE"
-        aws ec2 terminate-instances --instance-ids "$INSTANCE_ID" --region "$REGION" >> "$LOG_FILE" 2>&1
-        exit 0
-    fi
-    
-    # Get recent logs (last 30 seconds to catch the message)
-    recent_logs=$(docker logs --since 30s minecraft-server 2>&1)
-    
-    # Check if server empty message appeared
-    if echo "$recent_logs" | grep -q "Server empty for 60 seconds, pausing"; then
-        if [ $server_empty_time -eq 0 ]; then
-            # First time seeing this message - start countdown
-            server_empty_time=$(date +%%s)
-            echo "$(date): Server empty detected! Will terminate in $SHUTDOWN_DELAY seconds..." >> "$LOG_FILE"
-        fi
-    fi
-    
-    # If countdown is active, check if we should terminate or reset
-    if [ $server_empty_time -ne 0 ]; then
-        # Check if someone joined (only way to reset the countdown)
-        if echo "$recent_logs" | grep -q "joined the game"; then
-            echo "$(date): Player joined! Timer reset" >> "$LOG_FILE"
-            server_empty_time=0
-        else
-            # No one joined - continue countdown
-            current_time=$(date +%%s)
-            elapsed=$((current_time - server_empty_time))
-            
-            if [ $elapsed -ge $SHUTDOWN_DELAY ]; then
-                echo "$(date): Shutdown delay reached ($elapsed seconds)! Terminating instance..." >> "$LOG_FILE"
-                aws ec2 terminate-instances --instance-ids "$INSTANCE_ID" --region "$REGION" >> "$LOG_FILE" 2>&1
-                echo "$(date): Terminate command sent" >> "$LOG_FILE"
-                exit 0
-            else
-                echo "$(date): Server still empty... $elapsed/$SHUTDOWN_DELAY seconds" >> "$LOG_FILE"
-            fi
-        fi
-    fi
-    
-    sleep $CHECK_INTERVAL
-done
-EOF
-
-chmod +x /usr/local/bin/minecraft-auto-shutdown.sh
-
-# Create systemd service
-cat > /etc/systemd/system/minecraft-auto-shutdown.service << 'EOF'
-[Unit]
-Description=Minecraft Auto-Shutdown Monitor
-After=docker.service
-Requires=docker.service
-
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/minecraft-auto-shutdown.sh
-Restart=on-failure
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl daemon-reload
-systemctl enable minecraft-auto-shutdown.service
-systemctl start minecraft-auto-shutdown.service
-
-echo "$(date): Auto-shutdown monitor enabled" >> /var/log/minecraft-setup.log
-echo "Minecraft server setup complete. Server is starting..." >> /var/log/minecraft-setup.log
-`, dockerEnvFlags)
+	// Inject the Docker environment flags into the script template
+	userData := fmt.Sprintf(string(scriptContent), dockerEnvFlags)
 
 	return userData
 }
@@ -435,4 +334,19 @@ func (s *MinecraftService) createMinecraftSecurityGroup(ctx context.Context) (st
 
 	log.Printf("Security group created: %s", groupID)
 	return groupID, nil
+}
+
+// GetInstanceInfo fetches information about a specific EC2 instance
+func (s *MinecraftService) GetInstanceInfo(instanceID string) (*models.EC2InstanceResponse, error) {
+	return s.ec2Service.GetInstanceInfo(instanceID)
+}
+
+// ListAllInstances returns information about all EC2 instances
+func (s *MinecraftService) ListAllInstances() ([]models.EC2InstanceResponse, error) {
+	return s.ec2Service.ListAllInstances()
+}
+
+// StopInstance stops a running EC2 instance
+func (s *MinecraftService) StopInstance(instanceID string) error {
+	return s.ec2Service.StopInstance(instanceID)
 }

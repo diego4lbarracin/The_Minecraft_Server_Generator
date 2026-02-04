@@ -1,7 +1,14 @@
 package models
 
+/*
+The definition of models for servies assocciated with Minecraft services.
+*/
+
 // MinecraftServerRequest represents the request to create a Minecraft server
 type MinecraftServerRequest struct {
+	// User Information
+	UserEmail     string `json:"user_email"`                // User's email address for server naming
+	
 	// Server Configuration
 	ServerName    string `json:"server_name"`               // Name tag for the EC2 instance
 	MinecraftType string `json:"minecraft_type"`            // vanilla, spigot, paper, forge, fabric, etc.
@@ -15,22 +22,23 @@ type MinecraftServerRequest struct {
 	LevelSeed     string `json:"level_seed"`                // World seed (optional)
 	LevelName     string `json:"level_name"`                // World name (default: "world")
 	
-	// Server Resources
-	Memory        string `json:"memory"`                    // JVM memory allocation (e.g., "2G", "4G")
-	
 	// Advanced Options
 	EULA          bool   `json:"eula"`                      // Accept Minecraft EULA (required)
 	EnableCommand bool   `json:"enable_command_block"`     // Enable command blocks
 	PVP           bool   `json:"pvp"`                       // Enable PVP
 	OnlineMode    bool   `json:"online_mode"`               // Online mode (authentication)
+	WelcomeChest  bool   `json:"welcome_chest"`             // Note: Not supported by docker-minecraft-server (kept for future plugin implementation)
 	
 	// Mods/Plugins (optional)
 	ModPackURL    string   `json:"modpack_url"`             // URL to modpack zip file
 	PluginURLs    []string `json:"plugin_urls"`             // URLs to plugin JAR files
 	
-	// EC2 Configuration (optional - uses defaults if not specified)
-	InstanceType  string `json:"instance_type"`             // EC2 instance type (default: t3.small)
-	KeyName       string `json:"key_name"`                  // SSH key pair name (optional)
+	// NOTE: Memory (3G), InstanceType (t3.medium), and KeyName (from .env) are set internally and cannot be overridden from frontend
+	
+	// Internal fields (not exposed in JSON, set by backend only)
+	Memory        string `json:"-"`                        // JVM memory allocation (fixed at 3G)
+	InstanceType  string `json:"-"`                        // EC2 instance type (fixed at t3.medium)
+	KeyName       string `json:"-"`                        // SSH key pair name (from .env)
 }
 
 // MinecraftServerResponse represents the response after creating a Minecraft server
@@ -66,7 +74,7 @@ func (r *MinecraftServerRequest) SetDefaults() {
 		r.Version = "LATEST"
 	}
 	if r.MaxPlayers == 0 {
-		r.MaxPlayers = 20
+		r.MaxPlayers = 10
 	}
 	if r.Gamemode == "" {
 		r.Gamemode = "survival"
@@ -77,20 +85,13 @@ func (r *MinecraftServerRequest) SetDefaults() {
 	if r.LevelName == "" {
 		r.LevelName = "world"
 	}
-	if r.Memory == "" {
-		r.Memory = "1G"
-	}
-	if r.InstanceType == "" {
-		r.InstanceType = "t3.small"
-	}
+	// Always set these values regardless of input (backend-controlled)
+	r.Memory = "3G"
+	r.InstanceType = "t3.medium"
+	// KeyName is set from .env in the service layer
 	if r.MOTD == "" {
-		r.MOTD = "A Minecraft Server"
+		r.MOTD = "A server created using The Minecraft Server Generator :D"
 	}
-	// PVP and OnlineMode default to true
-	if !r.PVP {
-		r.PVP = true
-	}
-	if !r.OnlineMode {
-		r.OnlineMode = true
-	}
+	// Note: PVP and OnlineMode are set explicitly from frontend, no defaults needed
+	// Leaving them unset here allows frontend to control these boolean values
 }

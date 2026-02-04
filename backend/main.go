@@ -1,5 +1,11 @@
+/*
+Backend for The Minecraft Server Generator
+This is the main.go file, which works as the entry point for this part of the application.
+It sets up the Gin web server, configures routes, enables CORS, and starts listening for incoming requests.
+*/
 package main
 
+//Importing necessary packages.
 import (
 	"log"
 	"os"
@@ -13,17 +19,21 @@ import (
 )
 
 func main() {
-	//Loading the .env file
+	//Loading environment variables from .env file.
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}
 
-	//Defining router
-	router := gin.Default()
 
-	//Configuring CORS.
+	//Obtaining the only allowed origin from the .env file.
+	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
+	// Initializing a Gin router.
+	router := gin.Default()
+	
+
+	// CORS configuration.
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{allowedOrigin}, // Assigning allowed origin obtained from .env
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -32,41 +42,54 @@ func main() {
 
 	// Initialize EC2 Service
 	ec2Service, err := services.NewEC2Service()
-	if err != nil {
-		log.Fatalf("Failed to initialize EC2 service: %v", err)
+	if err != nil { // Handling error if EC2 service fails to initialize
+ 		log.Fatalf("Failed to initialize EC2 service: %v", err)
 	}
 
 	// Initialize Minecraft Service
 	minecraftService := services.NewMinecraftService(ec2Service)
 
-	// Initialize Handlers
+	// Initialize Version Service and start auto-refresh
+	versionService := services.GetVersionService()
+	versionService.StartAutoRefresh()
+
+	// Initialize Handlers: Handles the requests and responses from HTTP requests and call the appropriate service methods.
 	ec2Handler := handlers.NewEC2Handler(ec2Service)
 	minecraftHandler := handlers.NewMinecraftHandler(minecraftService)
 
-	// Register EC2 routes
+	// Register EC2 routes. API Endpoints related to EC2 instance management.
 	ec2Routes := router.Group("/ec2")
+	
+	/*
+	Protected endpoint: The following endpoint requires authentication. The AuthMiddleware checks for valid authentication tokens from the frontend 
+	before allowing access. It is important to protect this endpoint to prevent unauthorized access to EC2 instances (basically create a Minecraft Server),
+	otherwise everyone could create as many servers as they want and generate an UNEXPECTED increase in computing costs.
+	*/
 	ec2Routes.Use(middleware.AuthMiddleware()) // Protected routes
 	{
 		ec2Routes.POST("/create", ec2Handler.CreateInstance)
 	}
 
-	// Register Minecraft routes
+	// Register Minecraft routes. API Endpoints related to Minecraft server management.
 	minecraftRoutes := router.Group("/minecraft")
 	{
 		// Public routes (no auth required)
 		minecraftRoutes.GET("/health", minecraftHandler.HealthCheck)
 		
-		// Protected routes (auth required)
+		// Protected routes (auth required): As explained in line 60, only auth users are allowed to access the following endpoints.
 		minecraftRoutes.POST("/create", middleware.AuthMiddleware(), minecraftHandler.CreateMinecraftServer)
 		minecraftRoutes.GET("/info/:instance_id", middleware.AuthMiddleware(), minecraftHandler.GetServerInfo)
+		minecraftRoutes.DELETE("/stop/:instance_id", middleware.AuthMiddleware(), minecraftHandler.StopServer)
 		minecraftRoutes.POST("/test", middleware.AuthMiddleware(), minecraftHandler.TestServerCreation)
 	}
 
-	// Start server
+	// Register version routes (public endpoint)
+	router.GET("/versions", handlers.GetMinecraftVersions)
+
+	// Obtain the PORT from the .ENV file and store it inside the port variable.
 	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+
+	//Information logs for the server. Error handling when the server fails.
 	log.Printf("Server starting on port %s", port)
 	if err := router.Run(":" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)

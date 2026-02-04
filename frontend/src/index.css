@@ -1,5 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
+
+@font-face {
+  font-family: "Minecraft";
+  src: url("/fonts/MinecraftRegular-Bmg3.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Minecraft";
+  src: url("/fonts/MinecraftBold-nMK1.otf") format("opentype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   --color-minecraft-headerBrown: #25190c;
@@ -11,13 +26,18 @@
   --color-minecraft-dirt: #8b6f47;
   --color-minecraft-stone: #7f7f7f;
 
-  --font-family-minecraft: "Press Start 2P", cursive;
-  --font-family-sans: "Inter", system-ui, sans-serif;
+  --font-family-minecraft: "Minecraft", monospace;
+  --font-family-sans: "Minecraft", monospace;
 }
 
 @layer base {
+  * {
+    font-family: "Minecraft", monospace;
+  }
+
   body {
     background-color: #012500;
+    font-family: "Minecraft", monospace;
     @apply text-gray-100 m-0 min-h-screen;
   }
 }
@@ -37,5 +57,28 @@
 
   .card {
     @apply bg-white rounded-xl shadow-lg p-8;
+  }
+
+  .animate-fade-in-out {
+    animation: fadeInOut 2s ease-in-out;
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 }
