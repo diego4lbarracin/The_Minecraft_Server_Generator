@@ -158,11 +158,7 @@ const ServerStatusPage = () => {
   const handleAlertClose = () => {
     setShowAlert(false);
     // Redirect to dashboard
-    const basePath =
-      import.meta.env.VITE_GITHUB_PAGES === "true"
-        ? "/The_Minecraft_Server_Generator"
-        : "";
-    navigate(`${basePath}/dashboard`);
+    navigate("/dashboard");
   };
 
   const handleInactivityAlertClose = () => {
@@ -170,11 +166,7 @@ const ServerStatusPage = () => {
   };
 
   const handleBackToDashboard = () => {
-    const basePath =
-      import.meta.env.VITE_GITHUB_PAGES === "true"
-        ? "/The_Minecraft_Server_Generator"
-        : "";
-    navigate(`${basePath}/dashboard`);
+    navigate("/dashboard");
   };
 
   return (
@@ -477,8 +469,9 @@ const ServerStatusPage = () => {
                           Server Stopped
                         </h3>
                         <p className="text-gray-600">
-                          The server has been stopped due to inactivity. You can
-                          close this tab or click "Got it!" to continue.
+                          The server has been stopped due to inactivity or
+                          because you deliberately chose to do so. You can close
+                          this tab or click "Got it!" to continue.
                         </p>
                       </div>
                     </div>
