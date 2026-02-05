@@ -27,6 +27,9 @@ WORKDIR /root/
 # Copy the binary from builder
 COPY --from=builder /app/main .
 
+# Copy scripts directory (needed for EC2 init scripts)
+COPY --from=builder /app/scripts ./scripts
+
 # Expose port (Render will override with PORT env variable)
 EXPOSE 8080
 
