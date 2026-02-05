@@ -124,7 +124,7 @@ const DashboardPage = () => {
       const data = await response.json();
       console.log("Server created:", data);
 
-      // Open new tab with server status page
+      // Redirect to server status page
       const params = new URLSearchParams({
         instanceId: data.instance_id,
         publicIp: data.public_ip,
@@ -134,11 +134,7 @@ const DashboardPage = () => {
         serverType: data.server_type,
       });
 
-      const basePath =
-        import.meta.env.VITE_GITHUB_PAGES === "true"
-          ? "/The_Minecraft_Server_Generator"
-          : "";
-      window.open(`${basePath}/server-status?${params.toString()}`, "_blank");
+      navigate(`/server-status?${params.toString()}`);
 
       // Reset form
       setFormData({
@@ -204,7 +200,7 @@ const DashboardPage = () => {
       const data = await response.json();
       console.log("Server created:", data);
 
-      // Open new tab with server status page
+      // Redirect to server status page
       const params = new URLSearchParams({
         instanceId: data.instance_id,
         publicIp: data.public_ip,
@@ -214,11 +210,7 @@ const DashboardPage = () => {
         serverType: data.server_type,
       });
 
-      const basePath =
-        import.meta.env.VITE_GITHUB_PAGES === "true"
-          ? "/The_Minecraft_Server_Generator"
-          : "";
-      window.open(`${basePath}/server-status?${params.toString()}`, "_blank");
+      navigate(`/server-status?${params.toString()}`);
     } catch (err) {
       console.error("Error creating server:", err);
       setError(err.message || "Failed to create server. Please try again.");
