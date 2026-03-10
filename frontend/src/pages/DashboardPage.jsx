@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../config/supabaseClient";
 import Footer from "../components/Footer";
 import CreateServerForm from "../components/CreateServerForm";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { user, signOut, getAuthToken } = useAuth();
+  const { user, profile, signOut, getAuthToken, refreshProfile } = useAuth();
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [minecraftVersions, setMinecraftVersions] = useState([]);
   const [versionsLoading, setVersionsLoading] = useState(true);
+  const [showOutOfAttemptsAlert, setShowOutOfAttemptsAlert] = useState(false);
+  const [outOfAttemptsType, setOutOfAttemptsType] = useState("");
 
   // Form state
   const [formData, setFormData] = useState({
@@ -73,6 +76,12 @@ const DashboardPage = () => {
   const handleCreateCustomServer = async () => {
     if (!isFormValid()) return;
 
+    if ((profile?.custom_server_trial_attempts ?? 0) <= 0) {
+      setOutOfAttemptsType("custom");
+      setShowOutOfAttemptsAlert(true);
+      return;
+    }
+
     setIsCreating(true);
     setError("");
 
@@ -94,6 +103,25 @@ const DashboardPage = () => {
       );
 
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+      // Decrement custom server trial attempts
+      const { error: decrementError } = await supabase
+        .from("profiles")
+        .update({
+          custom_server_trial_attempts:
+            (profile?.custom_server_trial_attempts ?? 1) - 1,
+        })
+        .eq("id", user?.id);
+
+      if (decrementError) {
+        console.error(
+          "Failed to decrement custom_server_trial_attempts:",
+          decrementError,
+        );
+        throw new Error("Could not update trial attempts. Please try again.");
+      }
+      await refreshProfile();
+
       const response = await fetch(`${apiUrl}/minecraft/create`, {
         method: "POST",
         headers: {
@@ -157,6 +185,12 @@ const DashboardPage = () => {
   };
 
   const handleRunScript = async () => {
+    if ((profile?.test_service_trial_attempts ?? 0) <= 0) {
+      setOutOfAttemptsType("test");
+      setShowOutOfAttemptsAlert(true);
+      return;
+    }
+
     setIsRunning(true);
     setError("");
 
@@ -167,6 +201,24 @@ const DashboardPage = () => {
       if (!token) {
         throw new Error("Not authenticated. Please log in again.");
       }
+
+      // Decrement test service trial attempts
+      const { error: decrementError } = await supabase
+        .from("profiles")
+        .update({
+          test_service_trial_attempts:
+            (profile?.test_service_trial_attempts ?? 1) - 1,
+        })
+        .eq("id", user?.id);
+
+      if (decrementError) {
+        console.error(
+          "Failed to decrement test_service_trial_attempts:",
+          decrementError,
+        );
+        throw new Error("Could not update trial attempts. Please try again.");
+      }
+      await refreshProfile();
 
       // Call the backend API with authentication
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
@@ -219,8 +271,64 @@ const DashboardPage = () => {
     }
   };
 
+  const testAttemptsLeft = profile?.test_service_trial_attempts ?? 0;
+  const customAttemptsLeft = profile?.custom_server_trial_attempts ?? 0;
+
+  const attemptBadgeClass = (n) =>
+    n === 0
+      ? "text-red-500"
+      : n === 1
+        ? "text-amber-500"
+        : "text-minecraft-grass";
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#012500" }}>
+      {/* Out of attempts alert */}
+      {showOutOfAttemptsAlert && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <svg
+                  className="w-6 h-6 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Free Trial Exhausted
+                </h3>
+                <p className="text-gray-600">
+                  You have used all your free trial attempts for the{" "}
+                  <span className="font-semibold">
+                    {outOfAttemptsType === "test"
+                      ? "Test Service"
+                      : "Custom Server"}
+                  </span>{" "}
+                  feature. Please contact support to upgrade your account.
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowOutOfAttemptsAlert(false)}
+                className="btn-primary"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Dashboard Header */}
       <header className="bg-minecraft-headerBrown shadow-sm">
         <div className="container mx-auto px-6 py-4">
@@ -341,10 +449,20 @@ const DashboardPage = () => {
                   <p className="text-sm text-gray-600">
                     Run a default Minecraft Server to test our service.
                   </p>
+                  <p
+                    className={`text-xs mt-1 font-semibold ${attemptBadgeClass(testAttemptsLeft)}`}
+                  >
+                    Free Trial —{" "}
+                    {testAttemptsLeft === 0
+                      ? "No attempts remaining"
+                      : `${testAttemptsLeft} attempt${
+                          testAttemptsLeft !== 1 ? "s" : ""
+                        } remaining`}
+                  </p>
                 </div>
                 <button
                   onClick={handleRunScript}
-                  disabled={isRunning}
+                  disabled={isRunning || testAttemptsLeft === 0}
                   className="btn-primary flex items-center space-x-2 flex-shrink-0"
                 >
                   {isRunning ? (
@@ -401,7 +519,14 @@ const DashboardPage = () => {
               <div>
                 <div
                   className="flex flex-wrap items-center justify-between gap-3 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
-                  onClick={() => setShowCreateForm(!showCreateForm)}
+                  onClick={() => {
+                    if (customAttemptsLeft <= 0) {
+                      setOutOfAttemptsType("custom");
+                      setShowOutOfAttemptsAlert(true);
+                    } else {
+                      setShowCreateForm(!showCreateForm);
+                    }
+                  }}
                 >
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-1">
@@ -409,6 +534,16 @@ const DashboardPage = () => {
                     </h4>
                     <p className="text-sm text-gray-600">
                       Deploy a custom Minecraft server instance
+                    </p>
+                    <p
+                      className={`text-xs mt-1 font-semibold ${attemptBadgeClass(customAttemptsLeft)}`}
+                    >
+                      Free Trial —{" "}
+                      {customAttemptsLeft === 0
+                        ? "No attempts remaining"
+                        : `${customAttemptsLeft} attempt${
+                            customAttemptsLeft !== 1 ? "s" : ""
+                          } remaining`}
                     </p>
                   </div>
                   <button className="btn-secondary flex items-center space-x-2 flex-shrink-0">

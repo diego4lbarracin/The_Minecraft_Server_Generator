@@ -9,7 +9,7 @@ const ServerStatusPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { getAuthToken } = useAuth();
-  const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes = 120 seconds
+  const [timeRemaining, setTimeRemaining] = useState(5); // 5 seconds
   const [showIP, setShowIP] = useState(false);
   const [serverData, setServerData] = useState(null);
   const [isActive, setIsActive] = useState(false);
@@ -243,10 +243,10 @@ const ServerStatusPage = () => {
                   <span className="text-gray-700">EC2 instance launching</span>
                 </div>
                 <div
-                  className={`flex items-center space-x-3 ${timeRemaining < 150 ? "" : "opacity-50"}`}
+                  className={`flex items-center space-x-3 ${timeRemaining < 5 ? "" : "opacity-50"}`}
                 >
                   <div className="flex-shrink-0">
-                    {timeRemaining < 150 ? (
+                    {timeRemaining < 5 ? (
                       <svg
                         className="w-6 h-6 text-green-500"
                         fill="none"
@@ -267,10 +267,10 @@ const ServerStatusPage = () => {
                   <span className="text-gray-700">Installing Docker</span>
                 </div>
                 <div
-                  className={`flex items-center space-x-3 ${timeRemaining < 60 ? "" : "opacity-50"}`}
+                  className={`flex items-center space-x-3 ${timeRemaining < 3 ? "" : "opacity-50"}`}
                 >
                   <div className="flex-shrink-0">
-                    {timeRemaining < 60 ? (
+                    {timeRemaining < 3 ? (
                       <svg
                         className="w-6 h-6 text-green-500"
                         fill="none"
