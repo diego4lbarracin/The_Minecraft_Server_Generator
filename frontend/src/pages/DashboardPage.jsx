@@ -238,17 +238,22 @@ const DashboardPage = () => {
         <div className="max-w-4xl mx-auto">
           {/* Welcome Card */}
           <div className="card mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                  Welcome back to your dashboard{" "}
-                  <span style={{ color: "#22c55e" }}>{user?.email}</span>!
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-1">
+                  Welcome back!
                 </h2>
-                <p className="text-gray-600">
+                <p
+                  className="text-base sm:text-xl font-semibold break-all mb-2"
+                  style={{ color: "#22c55e" }}
+                >
+                  {user?.email}
+                </p>
+                <p className="text-gray-600 text-sm sm:text-base">
                   Manage your Minecraft servers from here
                 </p>
               </div>
-              <div className="hidden md:block">
+              <div className="hidden md:block flex-shrink-0">
                 <img
                   src="https://mc-heads.net/avatar/steve/100"
                   alt="Minecraft Avatar"
@@ -328,8 +333,8 @@ const DashboardPage = () => {
             </h3>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
+              <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-gray-50 rounded-lg">
+                <div className="min-w-0">
                   <h4 className="font-semibold text-gray-900 mb-1">
                     Test Our Service
                   </h4>
@@ -340,7 +345,7 @@ const DashboardPage = () => {
                 <button
                   onClick={handleRunScript}
                   disabled={isRunning}
-                  className="btn-primary flex items-center space-x-2"
+                  className="btn-primary flex items-center space-x-2 flex-shrink-0"
                 >
                   {isRunning ? (
                     <>
@@ -395,7 +400,7 @@ const DashboardPage = () => {
               {/* Create New Server Section */}
               <div>
                 <div
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="flex flex-wrap items-center justify-between gap-3 p-4 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => setShowCreateForm(!showCreateForm)}
                 >
                   <div>
@@ -406,7 +411,7 @@ const DashboardPage = () => {
                       Deploy a custom Minecraft server instance
                     </p>
                   </div>
-                  <button className="btn-secondary flex items-center space-x-2">
+                  <button className="btn-secondary flex items-center space-x-2 flex-shrink-0">
                     <svg
                       className={`w-5 h-5 transform transition-transform ${
                         showCreateForm ? "rotate-180" : ""
@@ -441,8 +446,8 @@ const DashboardPage = () => {
                 )}
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg opacity-50 cursor-not-allowed">
-                <div>
+              <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-gray-50 rounded-lg opacity-50 cursor-not-allowed">
+                <div className="min-w-0">
                   <h4 className="font-semibold text-gray-900 mb-1">
                     Server Configuration
                   </h4>
@@ -452,7 +457,7 @@ const DashboardPage = () => {
                 </div>
                 <button
                   disabled
-                  className="btn-secondary opacity-50 cursor-not-allowed"
+                  className="btn-secondary opacity-50 cursor-not-allowed flex-shrink-0"
                 >
                   Coming Soon
                 </button>

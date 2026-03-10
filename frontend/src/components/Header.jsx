@@ -17,16 +17,16 @@ const Header = () => {
           {/* Title/Logo */}
           <Link
             to="/"
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-2 min-w-0"
             title="Return to landing page"
           >
-            <h1 className="text-2xl md:text-3xl font-bold text-white hover:text-gray-200 hover:scale-110 transition-all duration-200">
+            <h1 className="text-base sm:text-xl md:text-3xl font-bold text-white hover:text-gray-200 hover:scale-110 transition-all duration-200 leading-tight">
               The Minecraft Server Generator
             </h1>
           </Link>
 
           {/* Auth Buttons */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
             {user ? (
               <>
                 <span className="text-white text-sm hidden md:inline">
