@@ -45,6 +45,11 @@ const SignUpPage = () => {
 
         if (error) {
           setError(error.message);
+        } else if (data.user?.identities?.length === 0) {
+          // Supabase returns an empty identities array when the email is already registered
+          setError(
+            "An account with this email already exists. Please log in instead.",
+          );
         } else {
           setAlertMessage(
             "Account created successfully! Your account is pending approval. You will receive an email notification once approved.",
