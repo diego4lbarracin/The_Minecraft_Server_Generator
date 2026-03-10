@@ -73,6 +73,10 @@ export const AuthProvider = ({ children }) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        // Build redirect URL dynamically so it works in dev (localhost) and production (GitHub Pages subpath)
+        emailRedirectTo: `${window.location.origin}${import.meta.env.BASE_URL}`,
+      },
     });
 
     // Immediately discard the session

@@ -8,7 +8,7 @@ In this project I created a web application that follows an API REST architectur
 
 ---
 
-## Table of Contents
+## Table of `Contents`
 
 - [Features](#-features)
 - [Architecture](#-architecture)

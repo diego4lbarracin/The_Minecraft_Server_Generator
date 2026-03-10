@@ -9,6 +9,8 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import PendingApprovalPage from "./pages/PendingApprovalPage";
 import ServerStatusPage from "./pages/ServerStatusPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 function App() {
   const basename =
@@ -59,6 +61,28 @@ function App() {
               <ProtectedRoute>
                 <DashboardPage />
               </ProtectedRoute>
+            }
+          />
+          {/* Forgot Password Route */}
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <Header />
+                <ForgotPasswordPage />
+                <Footer />
+              </PublicRoute>
+            }
+          />
+          {/* Reset Password Route - NOT in PublicRoute because recovery session is active */}
+          <Route
+            path="/reset-password"
+            element={
+              <>
+                <Header />
+                <ResetPasswordPage />
+                <Footer />
+              </>
             }
           />
           {/* Server Status Page - Public (opened in new tab) */}

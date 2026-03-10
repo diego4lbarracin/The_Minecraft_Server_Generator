@@ -33,7 +33,7 @@ const CreateServerForm = ({
       </div>
 
       {/* Server Type and Gamemode */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Server Type <span className="text-red-500">*</span>
@@ -81,7 +81,7 @@ const CreateServerForm = ({
       </div>
 
       {/* Minecraft Version and Difficulty */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">
             Minecraft Version <span className="text-red-500">*</span>

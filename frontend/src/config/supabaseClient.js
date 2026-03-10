@@ -10,6 +10,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    redirectTo: window.location.origin, // Redirect to landing page after email confirmation
+    flowType: "implicit", // Required: PKCE stores code_verifier in sessionStorage which is lost when email link opens a new tab
   },
 });

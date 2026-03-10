@@ -138,12 +138,12 @@ const LoginPage = () => {
               </label>
             </div>
             <div className="text-sm">
-              <a
-                href="#"
+              <Link
+                to="/forgot-password"
                 className="text-minecraft-green hover:text-minecraft-darkGreen font-semibold"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
           </div>
 

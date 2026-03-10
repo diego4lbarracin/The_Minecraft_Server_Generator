@@ -142,13 +142,57 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 		
 		// Extract claims
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			// Add user info to context
-			c.Set("user_id", claims["sub"])
-			c.Set("user_email", claims["email"])
-			log.Printf("Request authorized via JWT token (ES256) for user: %v from IP: %s", claims["email"], clientIP)
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error":   "Unauthorized",
+				"message": "Invalid token claims",
+			})
+			c.Abort()
+			return
 		}
-		
+
+		userID := fmt.Sprintf("%v", claims["sub"])
+		c.Set("user_id", userID)
+		c.Set("user_email", claims["email"])
+		log.Printf("JWT validated for user: %v from IP: %s", claims["email"], clientIP)
+
+		// --- Supabase DB access-control check ---
+		// Fetch the user's profile to verify approval status and remaining trial attempts.
+		profile, err := fetchUserProfile(userID)
+		if err != nil {
+			log.Printf("Could not fetch profile for user %s: %v", userID, err)
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "Forbidden",
+				"message": "Unable to verify user access. Please contact support.",
+			})
+			c.Abort()
+			return
+		}
+
+		// 1. Only approved users are allowed through.
+		if !profile.Approved {
+			log.Printf("Access denied for user %s: account not approved", userID)
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "Forbidden",
+				"message": "Your account has not been approved yet.",
+			})
+			c.Abort()
+			return
+		}
+
+		// 2. Both trial-attempt counters must be greater than zero.
+		if profile.TestServiceTrialAttempts <= 0 || profile.CustomServerTrialAttempts <= 0 {
+			log.Printf("Access denied for user %s: no trial attempts remaining (test=%d, custom=%d)",
+				userID, profile.TestServiceTrialAttempts, profile.CustomServerTrialAttempts)
+			c.JSON(http.StatusForbidden, gin.H{
+				"error":   "Forbidden",
+				"message": "You have no trial attempts remaining.",
+			})
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }
