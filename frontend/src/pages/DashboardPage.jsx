@@ -372,6 +372,7 @@ const DashboardPage = () => {
           </div>
 
           {/* Server Status Card */}
+          {/* Stats cards (Active Servers / Total Players / Uptime) — commented out until real data is available
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="card text-center">
               <div className="text-minecraft-green mb-2">
@@ -433,6 +434,7 @@ const DashboardPage = () => {
               <p className="text-gray-600 text-sm">Uptime</p>
             </div>
           </div>
+          */}
 
           {/* Action Card */}
           <div className="card">

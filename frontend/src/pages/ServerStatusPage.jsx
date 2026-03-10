@@ -9,7 +9,7 @@ const ServerStatusPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { getAuthToken } = useAuth();
-  const [timeRemaining, setTimeRemaining] = useState(5); // 5 seconds
+  const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes
   const [showIP, setShowIP] = useState(false);
   const [serverData, setServerData] = useState(null);
   const [isActive, setIsActive] = useState(false);
