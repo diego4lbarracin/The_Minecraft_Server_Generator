@@ -33,7 +33,8 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchVersions = async () => {
       try {
-        const response = await fetch("http://localhost:8080/versions");
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const response = await fetch(`${apiUrl}/versions`);
         if (response.ok) {
           const data = await response.json();
           setMinecraftVersions(data.versions || []);
@@ -102,7 +103,7 @@ const DashboardPage = () => {
         !formData.allowCrackedPlayers,
       );
 
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      const apiUrl = import.meta.env.VITE_API_URL;
 
       // Decrement custom server trial attempts
       const { error: decrementError } = await supabase
@@ -221,7 +222,7 @@ const DashboardPage = () => {
       await refreshProfile();
 
       // Call the backend API with authentication
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      const apiUrl = import.meta.env.VITE_API_URL;
       const response = await fetch(`${apiUrl}/minecraft/create`, {
         method: "POST",
         headers: {

@@ -55,7 +55,7 @@ const ServerStatusPage = () => {
     const checkServerStatus = async () => {
       try {
         const token = await getAuthToken();
-        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        const apiUrl = import.meta.env.VITE_API_URL;
 
         const response = await fetch(
           `${apiUrl}/minecraft/info/${serverData.instanceId}`,
@@ -121,7 +121,7 @@ const ServerStatusPage = () => {
 
     try {
       const token = await getAuthToken();
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      const apiUrl = import.meta.env.VITE_API_URL;
 
       const response = await fetch(
         `${apiUrl}/minecraft/stop/${serverData.instanceId}`,
