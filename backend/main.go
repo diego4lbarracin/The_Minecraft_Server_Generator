@@ -2,6 +2,7 @@
 Backend for The Minecraft Server Generator
 This is the main.go file, which works as the entry point for this part of the application.
 It sets up the Gin web server, configures routes, enables CORS, and starts listening for incoming requests.
+Developed by: diego4lbarracin using his own knowledge and understanding of software engineering and Claude Code.
 */
 package main
 
